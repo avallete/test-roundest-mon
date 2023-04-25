@@ -7,16 +7,19 @@ export const appRouter = trpc
   .router()
   .query("get-pokemon-pair", {
     async resolve() {
-      const [first, second] = getOptionsForVote();
-
-      const bothPokemon = await prisma.pokemon.findMany({
-        where: { id: { in: [first, second] } },
+      const pokemonCount = await prisma.pokemon.count();
+      const skipOne = Math.floor(Math.random() * pokemonCount - 1);
+      const skipTwo = Math.floor(Math.random() * pokemonCount - 1);
+      const pokemonOne = await prisma.pokemon.findFirst({
+        take: 1,
+        skip: skipOne,
+      });
+      const pokemonTwo = await prisma.pokemon.findFirst({
+        take: 1,
+        skip: skipTwo,
       });
 
-      if (bothPokemon.length !== 2)
-        throw new Error("Failed to find two pokemon");
-
-      return { firstPokemon: bothPokemon[0], secondPokemon: bothPokemon[1] };
+      return { firstPokemon: pokemonOne, secondPokemon: pokemonTwo };
     },
   })
   .mutation("cast-vote", {
