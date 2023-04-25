@@ -18,6 +18,9 @@ export const appRouter = trpc
         take: 1,
         skip: skipTwo,
       });
+      if (!pokemonOne || !pokemonTwo) {
+        throw new Error("Failed to find two pokemon");
+      }
 
       return { firstPokemon: pokemonOne, secondPokemon: pokemonTwo };
     },
