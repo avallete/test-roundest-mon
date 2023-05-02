@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/snaplet-restore
         env:
           SNAPLET_ACCESS_TOKEN: ${{ secrets.SNAPLET_ACCESS_TOKEN }}
-          SNAPLET_PROJECT_ID: ${{ secrets.SNAPLET_PROJECT_ID }}
+          SNAPLET_PROJECT_ID: clgwf526d0g4glyv0xi3rp3zh
           SNAPLET_TARGET_DATABASE_URL: postgres://postgres:postgres@localhost:5432/snapshot
         with:
           docker-image-tag: docker.io/avallete/snaplet-restore-container
