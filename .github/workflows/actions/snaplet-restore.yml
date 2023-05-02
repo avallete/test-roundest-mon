@@ -1,0 +1,34 @@
+name: Postgres Docker image with "baked-in" data
+author: Snaplet, Inc.
+description: Creates a Postgres Docker Image, with data from a Snaplet snapshot, for restoration in Codespaces, development environments.
+inputs:
+  docker-container-name:
+    description: Name of docker container
+    required: false
+    default: snapshot
+  docker-image-tag:
+    description: Name of docker image
+    required: true
+  snaplet-restore-command:
+    description: Command used to restore a snapshot
+    required: false
+    type: string
+    default: snaplet snapshot restore --latest
+runs:
+  using: "composite"
+  steps:
+    - name: Install Snaplet
+      run: |
+        curl -sS "https://app.snaplet.dev/get-cli/" | bash &> "/dev/null"
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: Restore snapshot
+      run: ${{ inputs.snaplet-restore-command }}
+      shell: bash
+
+    - name: Commit and push Docker image
+      run: |
+        docker commit ${{ inputs.docker-container-name }} ${{ steps.registry.outputs.tag }}
+        docker push ${{ steps.registry.outputs.tag }}
+      shell: bash
