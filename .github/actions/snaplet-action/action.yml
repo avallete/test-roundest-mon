@@ -1,0 +1,61 @@
+name: Snaplet Preview Databases
+
+author: Snaplet
+
+description: Deploy Snaplet preview databases filled with production-accurate data in no time.
+
+inputs:
+  database-create-command:
+    description: Command used to generate the instant database
+    required: false
+    type: string
+    default: snaplet preview-database create --git --latest
+  database-delete-command:
+    description: Command used to delete the instant database
+    required: false
+    type: string
+    default: snaplet preview-database drop --git
+  database-url-command:
+    description: Command used to get the instant database url
+    required: false
+    type: string
+    default: snaplet preview-database url --git
+  delete:
+    description: Delete the database
+    required: false
+    type: boolean
+    default: false
+  reset:
+    description: Reset the database state on each commit
+    required: false
+    type: boolean
+    default: false
+
+outputs:
+  database-url:
+    description: Instant database url
+    value: ${{ steps.deploy.outputs.database-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup
+      shell: bash
+      run: curl -sS "https://app.snaplet.dev/get-cli/" | bash &> "/dev/null"
+
+    - if: ${{ inputs.delete == 'false' }}
+      id: deploy
+      name: Deploy
+      shell: bash
+      run: |
+        if [ "${{ inputs.reset }}" == "true" ]; \
+        then ${{ inputs.database-delete-command }} && ${{ inputs.database-create-command }}; \
+        else ${{ inputs.database-url-command }} &> "/dev/null" || ${{ inputs.database-create-command }}; \
+        fi
+        echo "database-url=$(${{ inputs.database-url-command }})" >> $GITHUB_OUTPUT
+
+    - if: ${{ inputs.delete == 'true' }}
+      name: Delete
+      shell: bash
+      run: ${{ inputs.database-delete-command }}
+
